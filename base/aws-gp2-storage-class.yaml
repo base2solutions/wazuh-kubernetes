@@ -16,3 +16,9 @@ parameters:
   encrypted: 'true'
   type: gp2
 reclaimPolicy: Retain  # Useful in case you delete the PersistentVolumeClaim
+allowedTopologies:
+- matchLabelExpressions:
+  - key: failure-domain.beta.kubernetes.io/zone
+    values:
+    - us-west-2b
+    - us-west-2c
