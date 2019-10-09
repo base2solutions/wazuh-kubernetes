@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: wazuh-nginx
+  namespace: wazuh
+spec:
+  rules:
+  - host: wazuh.base2d.com
+    http:
+      paths:
+      - backend:
+          serviceName: wazuh-nginx
+          servicePort: 80
