@@ -135,6 +135,16 @@ data:
         </feed>
       </wodle>
 
+      <wodle name="aws-s3">
+        <disabled>no</disabled>
+        <interval>10m</interval>
+        <run_on_start>no</run_on_start>
+        <skip_on_error>no</skip_on_error>
+        <bucket type="cloudtrail">
+          <name>wazuh-cloudtrail.base2d.com</name>
+        </bucket>
+      </wodle>
+
       <!-- File integrity monitoring -->
       <syscheck>
         <disabled>no</disabled>
