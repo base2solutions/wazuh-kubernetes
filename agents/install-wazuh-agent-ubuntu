@@ -28,8 +28,6 @@ cat > /usr/local/bin/register-wazuh-agent <<'EOF'
 API_IP="wazuh-master.base2d.com"
 API_PORT="55000"
 PROTOCOL="https"
-USER="wazuh"
-PASSWORD="upthebase2wazuh"
 
 display_help() {
 cat <<HELP_USAGE
@@ -42,6 +40,8 @@ cat <<HELP_USAGE
    -s|--silent    Surpress the output while removing the agent
    agent          Agent name (if missing we will use the output
                   of the hostname command) 
+
+  You must also set the WAZUH_API_USER and WAZUH_API_PASSWORD environment variables to authenticate with the API.
 HELP_USAGE
 }
 
@@ -50,7 +50,7 @@ register_agent() {
   echo ""
   echo "Adding agent:"
   echo "curl -s -u $USER:**** -k -X POST -d 'name=$AGENT_NAME' $PROTOCOL://$API_IP:$API_PORT/agents"
-  API_RESULT=$(curl -s -u $USER:"$PASSWORD" -k -X POST -d 'name='$AGENT_NAME'&ip=any' $PROTOCOL://$API_IP:$API_PORT/agents)
+  API_RESULT=$(curl -s -u $WAZUH_API_USER:"$WAZUH_API_PASSWORD" -k -X POST -d 'name='$AGENT_NAME'&ip=any' $PROTOCOL://$API_IP:$API_PORT/agents)
   echo -e $API_RESULT | grep -q "\"error\":0" 2>&1
 
   if [ "$?" != "0" ]; then
