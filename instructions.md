@@ -140,17 +140,31 @@ $ kubectl apply -f base/wazuh-ns.yaml
 $ kubectl apply -f base/aws-gp2-storage-class.yaml
 ```
 
-### Step 3.2: Deploy Elasticsearch
+### Step 3.2 Create secrets
+Generate a user account for the API. 
+```BASH
+$ docker run --rm -it node npm install htpasswd && htpasswd -n wazuh
+```
+Place the output of the command in to a file called `user`. Use this file to create a username/password to be used by the API.
+```BASH
+$ kubectl create secret generic wazuh-api-credentials --from-file=./user -n wazuh
+```
+Create a username and password for the web UI. This is what you will use to log in to Kibana.
+```BASH
+$ kubectl create secret generic wazuh-dashboard --from-literal=username=<username> --from-literal=password=<password> -n wazuh
+```
+
+### Step 3.3: Deploy Elasticsearch
 
 Elasticsearch deployment.
 
 ```BASH
 $ kubectl apply -f elastic_stack/elasticsearch/elasticsearch-svc.yaml
-$ kubectl apply -f elastic_stack/elasticsearch/elasticsearch-api-svc.yaml
-$ kubectl apply -f elastic_stack/elasticsearch/elasticsearch-sts.yaml
+$ kubectl apply -f elastic_stack/elasticsearch/single-node/elasticsearch-api-svc.yaml
+$ kubectl apply -f elastic_stack/elasticsearch/single-node/elasticsearch-sts.yaml
 ```
 
-### Step 3.3: Deploy Kibana and Nginx
+### Step 3.4: Deploy Kibana and Nginx
 
 Kibana and Nginx deployment.
 
@@ -162,9 +176,10 @@ $ kubectl apply -f elastic_stack/kibana/nginx-svc.yaml
 
 $ kubectl apply -f elastic_stack/kibana/kibana-deploy.yaml
 $ kubectl apply -f elastic_stack/kibana/nginx-deploy.yaml
+$ kubectl apply -f elastic_stack/kibana/wazuh-ingress.yaml
 ```
 
-### Step 3.4: Deploy Logstash
+### Step 3.5: Deploy Logstash
 
 Logstash deployment.
 
@@ -173,7 +188,7 @@ $ kubectl apply -f elastic_stack/logstash/logstash-svc.yaml
 $ kubectl apply -f elastic_stack/logstash/logstash-deploy.yaml
 ```
 
-### Step 3.5: Deploy Wazuh
+### Step 3.6: Deploy Wazuh
 
 Wazuh cluster deployment.
 
@@ -193,6 +208,17 @@ $ kubectl apply -f wazuh_managers/wazuh-master-sts.yaml
 $ kubectl apply -f wazuh_managers/wazuh-worker-0-sts.yaml
 $ kubectl apply -f wazuh_managers/wazuh-worker-1-sts.yaml
 ```
+
+### Step 4: Configure Wazuh
+Set the API password. On the `wazuh-manager-master` pod, run the following.
+```BASH
+$ cd /var/ossec/api/configuration/auth
+$ node htpasswd -c user wazuh
+$ service wazuh-api restart
+```
+**NOTE: This does not currently persist a pod update**
+
+Navigate to the Wazuh UI in Kibana and set the username/password in the configuration settings. The API should be running internal to the deployment on `http://wazuh:55000`.
 
 ### Verifying the deployment
 
