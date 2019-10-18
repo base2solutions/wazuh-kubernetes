@@ -306,3 +306,10 @@ In this case, we have 2 options:
 - Install the agent on the host: This is the option that we recommend since the agent was originally designed for this purpose.
 
 We are researching if the agent is able to run as a *DaemonSet* container. A *DaemonSet* is a special type of Pod which is logically guaranteed to run on each Kubernetes node. This kind of agent will have access only to its container, so we should mount volumes used by other containers to monitor logs, files, etc.
+
+#### Helpful tricks
+To remove persistent volumes in the case of iterating/deleting the application. This would be used to clean up after ALL other resources have been deleted.
+```BASH
+kubectl get pvc -n wazuh | awk '{print $3}' | xargs -I % kubectl patch pv % -p '{"spec":{"persistentVolumeReclaimPolicy":"Delete"}}'
+kubectl get pvc -n wazuh | awk '{print $1}' | xargs -I % kubectl delete pvc % -n wazuh
+```
